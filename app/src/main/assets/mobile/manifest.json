@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "GeckoCord Mobile Layout",
+  "version": "1.0",
+  "description": "Turns the Discord desktop web client into a phone-friendly two-pane layout.",
+  "browser_specific_settings": {
+    "gecko": { "id": "mobile@geckocord" }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://discord.com/*", "https://*.discord.com/*"],
+      "css": ["mobile.css"],
+      "js": ["mobile.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": ["nativeMessaging", "nativeMessagingFromContent", "geckoViewAddons"]
+}

@@ -15,7 +15,7 @@ Inspired by Vendroid / VendroidEnhanced (web Discord + injected client mod), rew
 Scaffold / MVP:
 
 - GeckoRuntime + GeckoSession hosting Discord web
-- Desktop user-agent (Discord mobile site is incomplete)
+- Desktop user-agent (Discord mobile site is incomplete), reshaped into a phone layout by a built-in extension (`app/src/main/assets/mobile/`): channel list and chat are separate screens; edge-swipe or Back to move between them, swipe from the right edge for the member list
 - Hook for a future Vencord/Equicord WebExtension
 
 Not yet: voice, push, official token bridge, plugin UI.
