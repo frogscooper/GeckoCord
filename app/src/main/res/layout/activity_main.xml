@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.mozilla.geckoview.GeckoView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/geckoview"
+<!-- Spacers fill the status/navigation bar (and keyboard) insets with the
+     colour of the page edge they touch, reported by the mobile extension. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"
+    android:background="#FF1E1F22"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/status_spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#FF1E1F22" />
+
+    <org.mozilla.geckoview.GeckoView
+        android:id="@+id/geckoview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <View
+        android:id="@+id/nav_spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#FF1E1F22" />
+</LinearLayout>

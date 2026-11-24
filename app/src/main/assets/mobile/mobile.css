@@ -1,0 +1,410 @@
+/*
+ * GeckoCord mobile layout — styles for the data-gc-* tags set by mobile.js.
+ *
+ * Colours and type come from Discord's own theme variables (with dark-theme
+ * fallbacks), so light/dark/custom themes carry through. Everything is scoped
+ * to html[data-gc-mobile], set when the window is phone-sized.
+ */
+
+#gc-tabs,
+#gc-back {
+  display: none;
+}
+
+html[data-gc-mobile],
+html[data-gc-mobile] body,
+html[data-gc-mobile] #app-mount {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- desktop-only chrome ---------- */
+
+/* Title bar of the refreshed UI (inbox/help move to the tab bar). */
+html[data-gc-mobile] [data-gc-base] {
+  --custom-app-top-bar-height: 0px;
+}
+html[data-gc-mobile] [data-gc-titlebar] {
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+html[data-gc-mobile] [class*="sidebarResizeHandle_"] {
+  display: none !important;
+}
+
+/* ---------- list screen ---------- */
+
+html[data-gc-mobile] [data-gc-shell] {
+  position: relative !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding-bottom: 56px !important; /* tab bar */
+}
+
+html[data-gc-mobile] [data-gc-left="fill"],
+html[data-gc-mobile] [data-gc-left="fill"] [class*="sidebarList_"] {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+html[data-gc-mobile] [data-gc-shell] [class*="panels_"] {
+  max-width: none !important;
+}
+
+/* The account strip duplicates the "You" tab; voice controls stay. */
+html[data-gc-mobile] [data-gc-shell] [class*="panels_"] > :has([class*="avatarWrapper_"]):not(:has([class*="rtcConnectionStatus"])) {
+  display: none !important;
+}
+
+/* Thumb-sized channel and DM rows. */
+html[data-gc-mobile] [data-gc-shell] li[class*="containerDefault_"] [class*="link_"] {
+  min-height: 40px !important;
+  box-sizing: border-box !important;
+}
+html[data-gc-mobile] [data-gc-shell] li[class*="containerDefault_"] [class*="name_"] {
+  font-size: 16px !important;
+  line-height: 22px !important;
+}
+html[data-gc-mobile] [data-gc-shell] [class*="privateChannels_"] [class*="interactive_"] {
+  min-height: 48px !important;
+}
+
+/* ---------- chat screen ---------- */
+
+html[data-gc-mobile] [data-gc-page] {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  z-index: 50 !important;
+  background: var(--background-primary, #313338);
+  box-shadow: -10px 0 28px rgba(0, 0, 0, 0.28);
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  will-change: transform;
+  touch-action: pan-y;
+}
+html[data-gc-mobile][data-gc-view="list"] [data-gc-page] {
+  transform: translateX(calc(100% + var(--gc-drag, 0px))) !important;
+  pointer-events: none !important;
+}
+html[data-gc-mobile][data-gc-view="chat"] [data-gc-page] {
+  transform: translateX(max(0px, var(--gc-drag, 0px))) !important;
+}
+html[data-gc-mobile][data-gc-dragging] [data-gc-page],
+html[data-gc-mobile][data-gc-dragging] #gc-back {
+  transition: none !important;
+}
+
+html[data-gc-mobile] [data-gc-page] [class*="chat_"],
+html[data-gc-mobile] [data-gc-page] [class*="chatContent_"],
+html[data-gc-mobile] [data-gc-page] [class*="content_"],
+html[data-gc-mobile] [data-gc-page] form,
+html[data-gc-mobile] [data-gc-page] main {
+  min-width: 0 !important;
+}
+
+/* Header: back arrow on the left, a few roomy icons on the right. */
+html[data-gc-mobile] [data-gc-page] section[class*="title_"],
+html[data-gc-mobile] [data-gc-page] [class*="upperContainer_"] {
+  min-height: 52px !important;
+  padding-left: 48px !important;
+  padding-right: 4px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+html[data-gc-mobile] [data-gc-page] [class*="toolbar_"] {
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+}
+html[data-gc-mobile] [data-gc-page] [class*="toolbar_"] [class*="iconWrapper_"] {
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+html[data-gc-mobile] [data-gc-page] [class*="toolbar_"] [class*="search_"],
+html[data-gc-mobile] [data-gc-page] [class*="toolbar_"] [class*="divider_"],
+html[data-gc-mobile] [data-gc-page] [class*="toolbar_"] a[href*="support.discord.com"],
+html[data-gc-mobile] [data-gc-page] [class*="toolbar_"] > :has([class*="recentsIcon_"]) {
+  display: none !important;
+}
+
+/* Composer: rounded pill, no gift/sticker buttons. */
+html[data-gc-mobile] [data-gc-page] form {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+html[data-gc-mobile] [data-gc-page] [class*="channelTextArea_"] {
+  margin-bottom: 8px !important;
+}
+html[data-gc-mobile] [data-gc-page] [class*="channelTextArea_"] [class*="scrollableContainer_"] {
+  border-radius: 22px !important;
+}
+html[data-gc-mobile] [class*="channelTextArea_"] [class*="buttons_"] > :has([aria-label*="gift" i]),
+html[data-gc-mobile] [class*="channelTextArea_"] [class*="buttons_"] > :has([aria-label*="sticker" i]) {
+  display: none !important;
+}
+
+/* ---------- member list drawer ---------- */
+
+/* position:fixed resolves against the (transformed) chat page, so the drawer
+   escapes the chat column's clipping and spans the full screen height. */
+html[data-gc-mobile] [data-gc-page] [class*="membersWrap_"],
+html[data-gc-mobile] [data-gc-page] [class*="profilePanel_"],
+html[data-gc-mobile] [data-gc-page] [class*="userPanelOuter_"] {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: min(85vw, 320px) !important;
+  max-width: 85vw !important;
+  z-index: 60 !important;
+  transform: translateX(100%) !important;
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 240ms ease !important;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0);
+  border-radius: 16px 0 0 16px;
+  overflow: hidden !important;
+}
+html[data-gc-mobile] [data-gc-page] [class*="membersWrap_"] [class*="members_"] {
+  width: 100% !important;
+}
+html[data-gc-mobile][data-gc-members] [data-gc-page] [class*="membersWrap_"],
+html[data-gc-mobile][data-gc-members] [data-gc-page] [class*="profilePanel_"],
+html[data-gc-mobile][data-gc-members] [data-gc-page] [class*="userPanelOuter_"] {
+  transform: translateX(0) !important;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- back arrow ---------- */
+
+html[data-gc-mobile][data-gc-back] #gc-back {
+  display: flex;
+  position: fixed;
+  left: 4px;
+  z-index: 1001;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--header-primary, #f2f3f5);
+  transform: translateX(max(0px, var(--gc-drag, 0px)));
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[data-gc-mobile][data-gc-settings] #gc-back {
+  transform: none;
+}
+html[data-gc-mobile] #gc-back:active {
+  background: var(--background-modifier-active, rgba(255, 255, 255, 0.08));
+}
+
+/* ---------- tab bar ---------- */
+
+html[data-gc-mobile] #gc-tabs {
+  display: flex;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  height: 56px;
+  box-sizing: border-box;
+  background: var(--background-secondary-alt, #232428);
+  border-top: 1px solid var(--background-modifier-accent, rgba(255, 255, 255, 0.06));
+  font-family: var(--font-primary, "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif);
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[data-gc-mobile]:not([data-gc-view="list"]) #gc-tabs,
+html[data-gc-mobile][data-gc-settings] #gc-tabs {
+  transform: translateY(100%);
+  pointer-events: none;
+}
+html[data-gc-mobile] #gc-tabs button {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin: 0;
+  padding: 6px 0 4px;
+  border: 0;
+  background: none;
+  color: var(--interactive-normal, #b5bac1);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 13px;
+  cursor: pointer;
+}
+html[data-gc-mobile] #gc-tabs button[aria-current="page"] {
+  color: var(--interactive-active, #ffffff);
+}
+html[data-gc-mobile] #gc-tabs .gc-icon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  transition: transform 120ms ease;
+}
+html[data-gc-mobile] #gc-tabs button:active .gc-icon {
+  transform: scale(0.9);
+}
+html[data-gc-mobile] #gc-tabs .gc-icon img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+html[data-gc-mobile] #gc-tabs button:focus-visible,
+html[data-gc-mobile] #gc-back:focus-visible {
+  outline: 2px solid var(--focus-primary, #00a8fc);
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+/* ---------- bottom sheets: context menus, profiles, pickers ---------- */
+
+html[data-gc-mobile] [data-gc-sheet] {
+  position: fixed !important;
+  top: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  z-index: 1002 !important;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+  animation: gc-sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[data-gc-mobile] [data-gc-sheet] > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  transform: none !important;
+}
+html[data-gc-mobile] [data-gc-sheet] [role="menu"] {
+  width: 100% !important;
+  max-width: none !important;
+  max-height: 70vh !important;
+  box-sizing: border-box !important;
+  padding: 8px 8px 12px !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+html[data-gc-mobile] [data-gc-sheet] [role="menuitem"],
+html[data-gc-mobile] [data-gc-sheet] [role="menuitemcheckbox"],
+html[data-gc-mobile] [data-gc-sheet] [role="menuitemradio"] {
+  min-height: 44px !important;
+  font-size: 16px !important;
+  border-radius: 8px !important;
+}
+html[data-gc-mobile] [data-gc-sheet] [class*="userPopoutOuter"],
+html[data-gc-mobile] [data-gc-sheet] [class*="userProfileOuter"] {
+  width: 100% !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+@keyframes gc-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Other dialogs never wider than the screen. */
+html[data-gc-mobile] [role="dialog"],
+html[data-gc-mobile] [class*="modal_"],
+html[data-gc-mobile] [class*="focusLock_"] > * {
+  max-width: calc(100vw - 16px) !important;
+  min-width: 0 !important;
+}
+
+/* ---------- user settings: list screen, then page screen ---------- */
+
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] {
+  flex-direction: row !important;
+}
+html[data-gc-mobile][data-gc-settings="list"] [class*="standardSidebarView_"] [class*="contentRegion_"],
+html[data-gc-mobile][data-gc-settings="page"] [class*="standardSidebarView_"] [class*="sidebarRegion_"],
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="toolsContainer_"] {
+  display: none !important;
+}
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="sidebarRegion_"] {
+  flex: 1 1 100% !important;
+  justify-content: stretch !important;
+}
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="sidebarRegionScroller_"] {
+  width: 100% !important;
+}
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="sidebarRegionScroller_"] > nav,
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="sidebarRegion_"] [class*="sidebar_"] {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 56px 12px 24px !important;
+  box-sizing: border-box !important;
+}
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="sidebarRegion_"] [role="tab"] {
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 8px 12px !important;
+  font-size: 16px !important;
+  border-radius: 8px !important;
+}
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="contentRegion_"] {
+  flex: 1 1 100% !important;
+  min-width: 0 !important;
+}
+html[data-gc-mobile][data-gc-settings] [class*="standardSidebarView_"] [class*="contentColumn_"] {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 56px 16px 80px !important;
+  box-sizing: border-box !important;
+}
+
+/* ---------- login ---------- */
+
+html[data-gc-mobile] [class*="authBox_"],
+html[data-gc-mobile] [class*="authBoxExpanded_"] {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100vw !important;
+  box-sizing: border-box !important;
+  padding: 24px 16px !important;
+}
+html[data-gc-mobile] [class*="authBoxExpanded_"] [class*="qrLogin_"],
+html[data-gc-mobile] [class*="authBoxExpanded_"] [class*="verticalSeparator_"] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-gc-mobile] [data-gc-page],
+  html[data-gc-mobile] #gc-back,
+  html[data-gc-mobile] #gc-tabs,
+  html[data-gc-mobile] [data-gc-page] [class*="membersWrap_"],
+  html[data-gc-mobile] [data-gc-page] [class*="profilePanel_"] {
+    transition: none !important;
+  }
+  html[data-gc-mobile] [data-gc-sheet] {
+    animation: none !important;
+  }
+}
