@@ -30,6 +30,13 @@ Not yet: voice, push, official token bridge, plugin UI.
 ./gradlew :app:assembleDebug
 ```
 
+Debug builds accept JavaScript from adb, run in the page's content script, with results logged under the `GeckoCordEval` tag:
+
+```bash
+adb shell am broadcast -a dev.geckocord.EVAL --es b64 "$(printf 'return document.title' | base64 -w0)"
+adb logcat -s GeckoCordEval
+```
+
 First GeckoView download is large (~80-150 MB AAR).
 
 ## Disclaimer

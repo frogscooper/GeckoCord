@@ -152,8 +152,12 @@
     shell.setAttribute("data-gc-shell", "");
     for (const child of shell.children) {
       if (child === page) continue;
-      const rail = child.tagName === "NAV" || hasClass(child, "guilds_");
-      child.setAttribute("data-gc-left", rail ? "rail" : "fill");
+      // Older layout: server rail and channel sidebar are siblings. Refreshed
+      // layout: one sidebar holds both. Anything else is a notice banner.
+      let role = "notice";
+      if (child.tagName === "NAV" || hasClass(child, "guilds_")) role = "rail";
+      else if (hasClass(child, "sidebar_") || child.querySelector('[class*="sidebarList_"], [class*="guilds_"]')) role = "fill";
+      child.setAttribute("data-gc-left", role);
     }
 
     // Desktop title bar (refreshed UI) and notice banners sit beside the shell.
@@ -409,7 +413,7 @@
   let g = null;
 
   function scrollsX(el) {
-    for (; el && el !== document.body; el = el.parentElement) {
+    for (; el && el !== document.body && el !== page; el = el.parentElement) {
       if (el.scrollWidth > el.clientWidth + 1) {
         const ox = getComputedStyle(el).overflowX;
         if (ox === "auto" || ox === "scroll") return true;
@@ -530,20 +534,54 @@
   // ---------- native bridge ----------
 
   // System bars take the colour of the app edge they touch.
+  const opaque = (c) => !!c && c !== "transparent" && !/,\s*0\)$/.test(c);
+
+  // Resolves a Discord theme variable to rgb() via a throwaway element.
+  function themeColor(variable) {
+    if (!document.body) return "";
+    const probe = document.createElement("div");
+    probe.style.cssText = `position:absolute;width:0;height:0;background-color:var(${variable})`;
+    document.body.appendChild(probe);
+    const c = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return opaque(c) ? c : "";
+  }
+
+  // Background of the first opaque element at a point; image/gradient
+  // backgrounds (login screen) fall back to the theme's base colour.
   function colorAt(x, y) {
     for (let el = document.elementFromPoint(x, y); el; el = el.parentElement) {
-      const c = getComputedStyle(el).backgroundColor;
-      if (c && c !== "transparent" && !/,\s*0\)$/.test(c)) return c;
+      const cs = getComputedStyle(el);
+      if (opaque(cs.backgroundColor)) return cs.backgroundColor;
+      if (cs.backgroundImage && cs.backgroundImage !== "none") break;
     }
-    return document.body ? getComputedStyle(document.body).backgroundColor : "";
+    return themeColor("--chat-background-default") || themeColor("--background-base-lower") || themeColor("--background-primary");
+  }
+
+  let canvas = null;
+  function toRgb(color) {
+    try {
+      canvas = canvas || document.createElement("canvas");
+      canvas.width = canvas.height = 1;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = "#000";
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, 1, 1);
+      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+      return `rgb(${r}, ${g}, ${b})`;
+    } catch (err) {
+      return "";
+    }
   }
 
   function reportBars() {
     if (!port || root.hasAttribute("data-gc-dragging")) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const top = colorAt(w - 4, 1);
-    const bottom = colorAt(Math.round(w / 2), h - 1);
+    const top = toRgb(colorAt(w - 4, 1));
+    const bottom = toRgb(colorAt(Math.round(w / 2), h - 1));
+    if (!top || !bottom) return;
     const key = top + "|" + bottom;
     if (key === lastBars) return;
     lastBars = key;
@@ -563,6 +601,16 @@
     port.onMessage.addListener((msg) => {
       if (msg && msg.type === "back") {
         port.postMessage({ type: "backResult", id: msg.id, handled: handleBack() });
+      } else if (msg && msg.type === "eval") {
+        // Debug builds only (the app forwards these solely when debuggable).
+        let result;
+        try {
+          const value = new Function(msg.code)();
+          result = typeof value === "string" ? value : JSON.stringify(value);
+        } catch (err) {
+          result = "ERROR: " + err;
+        }
+        port.postMessage({ type: "evalResult", result: String(result) });
       }
     });
     port.onDisconnect.addListener(() => {

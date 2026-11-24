@@ -38,6 +38,29 @@ html[data-gc-mobile] [class*="sidebarResizeHandle_"] {
 
 /* ---------- list screen ---------- */
 
+/* Discord lays the frame out as a CSS grid with subgrids when the browser
+   supports them (Gecko does). Force its flexbox fallback instead, so the
+   channel list can take the full width once the chat page is lifted out. */
+html[data-gc-mobile] [data-gc-base] {
+  display: flex !important;
+  flex-direction: column !important;
+}
+html[data-gc-mobile] [data-gc-shell] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+html[data-gc-mobile] [data-gc-left="fill"] {
+  display: flex !important;
+  flex-direction: row !important;
+  visibility: visible !important; /* Discord's own narrow mode hides it */
+}
+html[data-gc-mobile] [data-gc-left="notice"],
+html[data-gc-mobile] [data-gc-page] [class*="hamburger_"] {
+  display: none !important;
+}
+
 html[data-gc-mobile] [data-gc-shell] {
   position: relative !important;
   overflow: hidden !important;
@@ -57,7 +80,9 @@ html[data-gc-mobile] [data-gc-shell] [class*="panels_"] {
   max-width: none !important;
 }
 
-/* The account strip duplicates the "You" tab; voice controls stay. */
+/* The floating account panel duplicates the "You" tab. Keep the panel only
+   while connected to voice, and then without the account strip. */
+html[data-gc-mobile] [data-gc-shell] [class*="panels_"]:not(:has([class*="rtcConnectionStatus"])),
 html[data-gc-mobile] [data-gc-shell] [class*="panels_"] > :has([class*="avatarWrapper_"]):not(:has([class*="rtcConnectionStatus"])) {
   display: none !important;
 }
@@ -84,7 +109,10 @@ html[data-gc-mobile] [data-gc-page] {
   min-width: 0 !important;
   max-width: none !important;
   z-index: 50 !important;
-  background: var(--background-primary, #313338);
+  /* Discord gives the page overflow:auto; the parked member drawer would
+     make it horizontally scrollable and swallow swipe gestures. */
+  overflow: hidden !important;
+  background: var(--chat-background-default, var(--background-primary, #313338));
   box-shadow: -10px 0 28px rgba(0, 0, 0, 0.28);
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
   will-change: transform;
@@ -111,7 +139,7 @@ html[data-gc-mobile] [data-gc-page] main {
 }
 
 /* Header: back arrow on the left, a few roomy icons on the right. */
-html[data-gc-mobile] [data-gc-page] section[class*="title_"],
+html[data-gc-mobile] [data-gc-page] section[class*="title_"]:not(:has([class*="upperContainer_"])),
 html[data-gc-mobile] [data-gc-page] [class*="upperContainer_"] {
   min-height: 52px !important;
   padding-left: 48px !important;
@@ -148,6 +176,7 @@ html[data-gc-mobile] [data-gc-page] form {
 html[data-gc-mobile] [data-gc-page] [class*="channelTextArea_"] {
   margin-bottom: 8px !important;
 }
+html[data-gc-mobile] [data-gc-page] [class*="channelTextArea_"],
 html[data-gc-mobile] [data-gc-page] [class*="channelTextArea_"] [class*="scrollableContainer_"] {
   border-radius: 22px !important;
 }
@@ -168,8 +197,9 @@ html[data-gc-mobile] [data-gc-page] [class*="userPanelOuter_"] {
   right: 0 !important;
   bottom: 0 !important;
   width: min(85vw, 320px) !important;
+  min-width: 0 !important;
   max-width: 85vw !important;
-  z-index: 60 !important;
+  z-index: 200 !important; /* above Discord's chat header (z-index 100) */
   transform: translateX(100%) !important;
   transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 240ms ease !important;
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0);
@@ -202,15 +232,18 @@ html[data-gc-mobile][data-gc-back] #gc-back {
   padding: 0;
   margin: 0;
   background: transparent;
-  color: var(--header-primary, #f2f3f5);
+  color: var(--text-strong, var(--header-primary, #f2f3f5));
   transform: translateX(max(0px, var(--gc-drag, 0px)));
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[data-gc-mobile][data-gc-members] #gc-back {
+  display: none;
 }
 html[data-gc-mobile][data-gc-settings] #gc-back {
   transform: none;
 }
 html[data-gc-mobile] #gc-back:active {
-  background: var(--background-modifier-active, rgba(255, 255, 255, 0.08));
+  background: var(--background-mod-normal, var(--background-modifier-active, rgba(255, 255, 255, 0.08)));
 }
 
 /* ---------- tab bar ---------- */
@@ -224,8 +257,8 @@ html[data-gc-mobile] #gc-tabs {
   z-index: 100;
   height: 56px;
   box-sizing: border-box;
-  background: var(--background-secondary-alt, #232428);
-  border-top: 1px solid var(--background-modifier-accent, rgba(255, 255, 255, 0.06));
+  background: var(--background-base-lowest, var(--background-secondary-alt, #232428));
+  border-top: 1px solid var(--border-subtle, var(--background-modifier-accent, rgba(255, 255, 255, 0.06)));
   font-family: var(--font-primary, "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif);
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -245,7 +278,7 @@ html[data-gc-mobile] #gc-tabs button {
   padding: 6px 0 4px;
   border: 0;
   background: none;
-  color: var(--interactive-normal, #b5bac1);
+  color: var(--interactive-text-default, var(--interactive-normal, #b5bac1));
   font: inherit;
   font-size: 11px;
   font-weight: 600;
@@ -253,7 +286,7 @@ html[data-gc-mobile] #gc-tabs button {
   cursor: pointer;
 }
 html[data-gc-mobile] #gc-tabs button[aria-current="page"] {
-  color: var(--interactive-active, #ffffff);
+  color: var(--interactive-text-active, var(--interactive-active, #ffffff));
 }
 html[data-gc-mobile] #gc-tabs .gc-icon {
   width: 24px;
@@ -273,7 +306,7 @@ html[data-gc-mobile] #gc-tabs .gc-icon img {
 }
 html[data-gc-mobile] #gc-tabs button:focus-visible,
 html[data-gc-mobile] #gc-back:focus-visible {
-  outline: 2px solid var(--focus-primary, #00a8fc);
+  outline: 2px solid var(--control-primary-background-default, var(--focus-primary, #5865f2));
   outline-offset: -2px;
   border-radius: 10px;
 }
@@ -306,6 +339,15 @@ html[data-gc-mobile] [data-gc-sheet] [role="menu"] {
   box-sizing: border-box !important;
   padding: 8px 8px 12px !important;
   border-radius: 16px 16px 0 0 !important;
+}
+html[data-gc-mobile] [data-gc-sheet] [role="menu"]::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 4px;
+  margin: 0 auto 8px;
+  border-radius: 2px;
+  background: var(--background-mod-strong, rgba(255, 255, 255, 0.2));
 }
 html[data-gc-mobile] [data-gc-sheet] [role="menuitem"],
 html[data-gc-mobile] [data-gc-sheet] [role="menuitemcheckbox"],

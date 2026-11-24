@@ -1,16 +1,23 @@
 package dev.geckocord
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import org.json.JSONObject
+import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
@@ -22,6 +29,8 @@ import org.mozilla.geckoview.WebExtension
 class MainActivity : Activity() {
     companion object {
         private const val TAG = "GeckoCord"
+        private const val EVAL_TAG = "GeckoCordEval"
+        private const val EVAL_ACTION = "dev.geckocord.EVAL"
         private var runtime: GeckoRuntime? = null
         private const val DISCORD_URL = "https://discord.com/app"
 
@@ -47,6 +56,7 @@ class MainActivity : Activity() {
     private var backId = 0
     private var pendingBack: Runnable? = null
 
+    private var evalReceiver: BroadcastReceiver? = null
     private lateinit var statusSpacer: View
     private lateinit var navSpacer: View
 
@@ -83,7 +93,20 @@ class MainActivity : Activity() {
                 this@MainActivity.canGoBack = canGoBack
             }
         }
+        session.permissionDelegate = object : GeckoSession.PermissionDelegate {
+            // Persistent storage keeps the Discord login across restarts.
+            override fun onContentPermissionRequest(
+                session: GeckoSession,
+                perm: GeckoSession.PermissionDelegate.ContentPermission
+            ): GeckoResult<Int> = GeckoResult.fromValue(
+                if (perm.permission == GeckoSession.PermissionDelegate.PERMISSION_PERSISTENT_STORAGE)
+                    GeckoSession.PermissionDelegate.ContentPermission.VALUE_ALLOW
+                else
+                    GeckoSession.PermissionDelegate.ContentPermission.VALUE_PROMPT
+            )
+        }
         session.open(rt)
+        if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) registerEvalReceiver()
         view.setSession(session)
 
         // Install the mobile layout extension before loading Discord so its
@@ -109,6 +132,7 @@ class MainActivity : Activity() {
                 val json = message as? JSONObject ?: return
                 when (json.optString("type")) {
                     "backResult" -> if (json.optInt("id") == backId) resolveBack(json.optBoolean("handled"))
+                    "evalResult" -> json.optString("result").chunked(3000).forEach { Log.i(EVAL_TAG, it) }
                     "bars" -> {
                         val top = parseCssColor(json.optString("top")) ?: return
                         val bottom = parseCssColor(json.optString("bottom")) ?: top
@@ -232,7 +256,30 @@ class MainActivity : Activity() {
         }
     }
 
+    /**
+     * Debug builds: run JS in the page's content script from adb, e.g.
+     *   adb shell am broadcast -a dev.geckocord.EVAL --es b64 <base64 of "return document.title">
+     * Results are logged under the GeckoCordEval tag.
+     */
+    private fun registerEvalReceiver() {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val b64 = intent.getStringExtra("b64") ?: return
+                val code = String(Base64.decode(b64, Base64.DEFAULT))
+                val p = port ?: return Log.w(EVAL_TAG, "no page connected").let { }
+                p.postMessage(JSONObject().put("type", "eval").put("code", code))
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, IntentFilter(EVAL_ACTION), Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(receiver, IntentFilter(EVAL_ACTION))
+        }
+        evalReceiver = receiver
+    }
+
     override fun onDestroy() {
+        evalReceiver?.let { unregisterReceiver(it) }
         pendingBack?.let { handler.removeCallbacks(it) }
         session.close()
         super.onDestroy()
